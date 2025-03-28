@@ -1,8 +1,12 @@
-from http import HTTPStatus as hs
+from http import HTTPStatus
 
 from django.contrib.auth import get_user
 
 from .fixtures import Fixtures
+
+
+OK = HTTPStatus.OK
+NOT_FOUND = HTTPStatus.NOT_FOUND
 
 
 class TestRoutes(Fixtures):
@@ -18,19 +22,19 @@ class TestRoutes(Fixtures):
 
     def test_routes(self):
         url_paths_check_status = (
-            (self.notes_home, self.client, hs.OK),
-            (self.users_login, self.client, hs.OK),
-            (self.users_logout, self.client, hs.OK),
-            (self.users_signup, self.client, hs.OK),
-            (self.notes_add, self.author_client, hs.OK),
-            (self.notes_list, self.author_client, hs.OK),
-            (self.notes_success, self.author_client, hs.OK),
-            (self.notes_edit, self.author_client, hs.OK),
-            (self.notes_delete, self.author_client, hs.OK),
-            (self.notes_detail, self.author_client, hs.OK),
-            (self.notes_edit, self.not_author_client, hs.NOT_FOUND),
-            (self.notes_delete, self.not_author_client, hs.NOT_FOUND),
-            (self.notes_detail, self.not_author_client, hs.NOT_FOUND),
+            (self.notes_home, self.client, OK),
+            (self.users_login, self.client, OK),
+            (self.users_logout, self.client, OK),
+            (self.users_signup, self.client, OK),
+            (self.notes_add, self.author_client, OK),
+            (self.notes_list, self.author_client, OK),
+            (self.notes_success, self.author_client, OK),
+            (self.notes_edit, self.author_client, OK),
+            (self.notes_delete, self.author_client, OK),
+            (self.notes_detail, self.author_client, OK),
+            (self.notes_edit, self.not_author_client, NOT_FOUND),
+            (self.notes_delete, self.not_author_client, NOT_FOUND),
+            (self.notes_detail, self.not_author_client, NOT_FOUND),
         )
         for (
             reverse_url, parametrized_client, http_status

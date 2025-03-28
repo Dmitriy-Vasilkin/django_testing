@@ -1,4 +1,4 @@
-from http import HTTPStatus as hs
+from http import HTTPStatus
 
 import pytest
 from pytest_django.asserts import assertRedirects
@@ -9,8 +9,8 @@ ANONIM = lf('client')
 AUTHOR = lf('author_client')
 NOT_AUTHOR = lf('not_author_client')
 
-OK = hs.OK
-NOT_FOUND = hs.NOT_FOUND
+OK = HTTPStatus.OK
+NOT_FOUND = HTTPStatus.NOT_FOUND
 
 pytestmark = pytest.mark.django_db
 
