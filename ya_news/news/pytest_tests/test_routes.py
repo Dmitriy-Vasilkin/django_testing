@@ -1,82 +1,53 @@
-import pytest
-
 from http import HTTPStatus
 
-from django.urls import reverse
-
+import pytest
 from pytest_django.asserts import assertRedirects
 
 
-@pytest.mark.django_db
-@pytest.mark.parametrize(
-    'name',
-    ('news:home', 'users:login', 'users:logout', 'users:signup')
-)
-def test_pages_availability_for_anonymous(client, name):
-    """Проверка доступности страниц для анонимного пользователя."""
-    url = reverse(name)
-    response = client.get(url)
-    assert response.status_code == HTTPStatus.OK
+ANONIM = pytest.lazy_fixture('client')
+AUTHOR = pytest.lazy_fixture('author_client')
+NOT_AUTHOR = pytest.lazy_fixture('not_author_client')
 
+OK = HTTPStatus.OK
+NOT_FOUND = HTTPStatus.NOT_FOUND
 
-@pytest.mark.django_db
-def test_news_availability_for_anonymous(client, news):
-    """Страница отдельной новости доступна анонимному пользователю."""
-    url = reverse('news:detail', args=(news.id,))
-    response = client.get(url)
-    assert response.status_code == HTTPStatus.OK
-
-
-def test_comment_edit_availability_for_author(author_client, news, comment):
-    """Редактирование комментария доступно автору комментария."""
-    url = reverse('news:edit', args=(comment.id,))
-    response = author_client.get(url)
-    assert response.status_code == HTTPStatus.OK
-
-
-def test_comment_delete_availability_for_author(author_client, news, comment):
-    """Удаление комментария доступно автору комментария."""
-    url = reverse('news:delete', args=(comment.id,))
-    response = author_client.get(url)
-    assert response.status_code == HTTPStatus.OK
+pytestmark = pytest.mark.django_db
 
 
 @pytest.mark.parametrize(
-
-    'name, note_object',
+    'reverse_url, parametrized_client, http_status',
     (
-        ('news:edit', pytest.lazy_fixture('comment')),
-        ('news:delete', pytest.lazy_fixture('comment')),
-
-    ),
+        (pytest.lazy_fixture('news_home'), ANONIM, OK),
+        (pytest.lazy_fixture('users_login'), ANONIM, OK),
+        (pytest.lazy_fixture('users_logout'), ANONIM, OK),
+        (pytest.lazy_fixture('users_signup'), ANONIM, OK),
+        (pytest.lazy_fixture('news_detail'), ANONIM, OK),
+        (pytest.lazy_fixture('comment_edit'), AUTHOR, OK),
+        (pytest.lazy_fixture('comment_delete'), AUTHOR, OK),
+        (pytest.lazy_fixture('comment_edit'), NOT_AUTHOR, NOT_FOUND),
+        (pytest.lazy_fixture('comment_delete'), NOT_AUTHOR, NOT_FOUND),
+    )
 )
-@pytest.mark.django_db
-def test_del_and_edit_anonim(client, news, name, note_object):
+def test_routes(reverse_url, parametrized_client, http_status):
+    """Проверка доступности страниц."""
+    response = parametrized_client.get(reverse_url)
+    assert response.status_code == http_status
+
+
+@pytest.mark.parametrize(
+    'reverse_url, redirect_url',
+    (
+        (
+            pytest.lazy_fixture('comment_edit'),
+            pytest.lazy_fixture('redirect_comment_edit')
+        ),
+        (
+            pytest.lazy_fixture('comment_delete'),
+            pytest.lazy_fixture('redirect_comment_delete')
+        ),
+    )
+)
+def test_redirect(client, reverse_url, redirect_url):
     """Редактирование и удаление комментария анонимным пользователем."""
-    login_url = reverse('users:login')
-    if note_object is not None:
-        url = reverse(name, args=(note_object.id,))
-    else:
-        url = reverse(name)
-    expected_url = f'{login_url}?next={url}'
-    response = client.get(url)
-    assertRedirects(response, expected_url)
-
-
-@pytest.mark.parametrize(
-
-    'name, note_object',
-    (
-        ('news:edit', pytest.lazy_fixture('comment')),
-        ('news:delete', pytest.lazy_fixture('comment')),
-
-    ),
-)
-def test_del_and_edit_not_author(not_author_client, news, name, note_object):
-    """Редактирование и удаление не своих комментариев неавтором."""
-    if note_object is not None:
-        url = reverse(name, args=(note_object.id,))
-    else:
-        url = reverse(name)
-    response = not_author_client.get(url)
-    assert response.status_code == HTTPStatus.NOT_FOUND
+    response = client.get(reverse_url)
+    assertRedirects(response, redirect_url)

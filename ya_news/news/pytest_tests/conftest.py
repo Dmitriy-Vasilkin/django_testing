@@ -1,11 +1,12 @@
-import pytest
-
 from datetime import timedelta
 
+import pytest
 from django.test.client import Client
+from django.urls import reverse
 from django.utils import timezone
 
 from news.models import Comment, News
+from yanews.settings import NEWS_COUNT_ON_HOME_PAGE
 
 
 @pytest.fixture
@@ -18,20 +19,20 @@ def not_author(django_user_model):
     return django_user_model.objects.create(username='Пользователь')
 
 
+def login_user_client(user):
+    client = Client()
+    client.force_login(user)
+    return client
+
+
 @pytest.fixture
 def author_client(author):
-    return login_user(author)
+    return login_user_client(author)
 
 
 @pytest.fixture
 def not_author_client(not_author):
-    return login_user(not_author)
-
-
-def login_user(user):
-    client = Client()
-    client.force_login(user)
-    return client
+    return login_user_client(not_author)
 
 
 @pytest.fixture
@@ -61,9 +62,9 @@ def several_news():
             text=f'Новость {i}',
             date=timezone.now() - timedelta(days=i)
         )
-        for i in range(11)
+        for i in range(NEWS_COUNT_ON_HOME_PAGE + 1)
     ]
-    return News.objects.bulk_create(all_news)
+    News.objects.bulk_create(all_news)
 
 
 @pytest.fixture
@@ -79,7 +80,45 @@ def several_comments(news, author):
 
 
 @pytest.fixture
-def form_data():
-    return {
-        'text': 'Новый комментарий'
-    }
+def news_home():
+    return reverse('news:home')
+
+
+@pytest.fixture
+def users_login():
+    return reverse('users:login')
+
+
+@pytest.fixture
+def users_logout():
+    return reverse('users:logout')
+
+
+@pytest.fixture
+def users_signup():
+    return reverse('users:signup')
+
+
+@pytest.fixture
+def news_detail(news):
+    return reverse('news:detail', args=(news.id,))
+
+
+@pytest.fixture
+def comment_edit(comment):
+    return reverse('news:edit', args=(comment.id,))
+
+
+@pytest.fixture
+def comment_delete(comment):
+    return reverse('news:delete', args=(comment.id,))
+
+
+@pytest.fixture
+def redirect_comment_edit(users_login, comment_edit):
+    return f'{users_login}?next={comment_edit}'
+
+
+@pytest.fixture
+def redirect_comment_delete(users_login, comment_delete):
+    return f'{users_login}?next={comment_delete}'
