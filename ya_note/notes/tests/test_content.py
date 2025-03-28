@@ -8,8 +8,7 @@ class TestContent(Fixtures):
 
     Методы:
         test_only_author_notes()
-            - в список заметок попадают записи
-              только одного пользователя.
+            - в список заметок попадают записи только одного пользователя.
         test_note_in_context()
             - отдельная заметка передаётся в словаре context.
         test_authorized_client_has_form()

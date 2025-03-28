@@ -1,8 +1,10 @@
 import pytest
+from django.conf import settings
 
 from news.forms import CommentForm
-from yanews.settings import NEWS_COUNT_ON_HOME_PAGE
 
+
+QUANTITY_NEWS = settings.NEWS_COUNT_ON_HOME_PAGE
 
 pytestmark = pytest.mark.django_db
 
@@ -10,7 +12,7 @@ pytestmark = pytest.mark.django_db
 def test_note_in_list_for_author(client, several_news, news_home):
     """Количество новостей на главной странице."""
     assert client.get(news_home).context['object_list'].count(
-    ) == NEWS_COUNT_ON_HOME_PAGE
+    ) == QUANTITY_NEWS
 
 
 def test_news_order(client, several_news, news_home):

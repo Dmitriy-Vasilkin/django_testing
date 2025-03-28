@@ -1,15 +1,16 @@
-from http import HTTPStatus
+from http import HTTPStatus as hs
 
 import pytest
 from pytest_django.asserts import assertRedirects
+from pytest_lazyfixture import lazy_fixture as lf
 
 
-ANONIM = pytest.lazy_fixture('client')
-AUTHOR = pytest.lazy_fixture('author_client')
-NOT_AUTHOR = pytest.lazy_fixture('not_author_client')
+ANONIM = lf('client')
+AUTHOR = lf('author_client')
+NOT_AUTHOR = lf('not_author_client')
 
-OK = HTTPStatus.OK
-NOT_FOUND = HTTPStatus.NOT_FOUND
+OK = hs.OK
+NOT_FOUND = hs.NOT_FOUND
 
 pytestmark = pytest.mark.django_db
 
@@ -17,15 +18,15 @@ pytestmark = pytest.mark.django_db
 @pytest.mark.parametrize(
     'reverse_url, parametrized_client, http_status',
     (
-        (pytest.lazy_fixture('news_home'), ANONIM, OK),
-        (pytest.lazy_fixture('users_login'), ANONIM, OK),
-        (pytest.lazy_fixture('users_logout'), ANONIM, OK),
-        (pytest.lazy_fixture('users_signup'), ANONIM, OK),
-        (pytest.lazy_fixture('news_detail'), ANONIM, OK),
-        (pytest.lazy_fixture('comment_edit'), AUTHOR, OK),
-        (pytest.lazy_fixture('comment_delete'), AUTHOR, OK),
-        (pytest.lazy_fixture('comment_edit'), NOT_AUTHOR, NOT_FOUND),
-        (pytest.lazy_fixture('comment_delete'), NOT_AUTHOR, NOT_FOUND),
+        (lf('news_home'), ANONIM, OK),
+        (lf('users_login'), ANONIM, OK),
+        (lf('users_logout'), ANONIM, OK),
+        (lf('users_signup'), ANONIM, OK),
+        (lf('news_detail'), ANONIM, OK),
+        (lf('comment_edit'), AUTHOR, OK),
+        (lf('comment_delete'), AUTHOR, OK),
+        (lf('comment_edit'), NOT_AUTHOR, NOT_FOUND),
+        (lf('comment_delete'), NOT_AUTHOR, NOT_FOUND),
     )
 )
 def test_routes(reverse_url, parametrized_client, http_status):
@@ -37,14 +38,8 @@ def test_routes(reverse_url, parametrized_client, http_status):
 @pytest.mark.parametrize(
     'reverse_url, redirect_url',
     (
-        (
-            pytest.lazy_fixture('comment_edit'),
-            pytest.lazy_fixture('redirect_comment_edit')
-        ),
-        (
-            pytest.lazy_fixture('comment_delete'),
-            pytest.lazy_fixture('redirect_comment_delete')
-        ),
+        (lf('comment_edit'), lf('redirect_comment_edit')),
+        (lf('comment_delete'), lf('redirect_comment_delete')),
     )
 )
 def test_redirect(client, reverse_url, redirect_url):

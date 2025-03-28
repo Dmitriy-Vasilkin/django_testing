@@ -1,4 +1,6 @@
-from http import HTTPStatus
+from http import HTTPStatus as hs
+
+from django.contrib.auth import get_user
 
 from .fixtures import Fixtures
 
@@ -16,25 +18,27 @@ class TestRoutes(Fixtures):
 
     def test_routes(self):
         url_paths_check_status = (
-            (self.notes_home, self.client, HTTPStatus.OK),
-            (self.users_login, self.client, HTTPStatus.OK),
-            (self.users_logout, self.client, HTTPStatus.OK),
-            (self.users_signup, self.client, HTTPStatus.OK),
-            (self.notes_add, self.author_client, HTTPStatus.OK),
-            (self.notes_list, self.author_client, HTTPStatus.OK),
-            (self.notes_success, self.author_client, HTTPStatus.OK),
-            (self.notes_edit, self.author_client, HTTPStatus.OK),
-            (self.notes_delete, self.author_client, HTTPStatus.OK),
-            (self.notes_detail, self.author_client, HTTPStatus.OK),
-            (self.notes_edit, self.not_author_client, HTTPStatus.NOT_FOUND),
-            (self.notes_delete, self.not_author_client, HTTPStatus.NOT_FOUND),
-            (self.notes_detail, self.not_author_client, HTTPStatus.NOT_FOUND),
+            (self.notes_home, self.client, hs.OK),
+            (self.users_login, self.client, hs.OK),
+            (self.users_logout, self.client, hs.OK),
+            (self.users_signup, self.client, hs.OK),
+            (self.notes_add, self.author_client, hs.OK),
+            (self.notes_list, self.author_client, hs.OK),
+            (self.notes_success, self.author_client, hs.OK),
+            (self.notes_edit, self.author_client, hs.OK),
+            (self.notes_delete, self.author_client, hs.OK),
+            (self.notes_detail, self.author_client, hs.OK),
+            (self.notes_edit, self.not_author_client, hs.NOT_FOUND),
+            (self.notes_delete, self.not_author_client, hs.NOT_FOUND),
+            (self.notes_detail, self.not_author_client, hs.NOT_FOUND),
         )
         for (
             reverse_url, parametrized_client, http_status
         ) in url_paths_check_status:
             with self.subTest(
-                reverse_url=reverse_url, http_status=http_status
+                reverse_url=reverse_url,
+                http_status=http_status,
+                client=get_user(parametrized_client)
             ):
                 response = parametrized_client.get(reverse_url)
                 self.assertEqual(response.status_code, http_status)

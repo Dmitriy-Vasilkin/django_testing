@@ -63,11 +63,11 @@ def test_author_can_edit_comment(
     """Авторизованный пользователь может редактировать свои комментарии."""
     new_comment = 'Новый комментарий'
     response = author_client.post(comment_edit, data={'text': new_comment})
-    comment.refresh_from_db()
+    new_comment = Comment.objects.get(id=comment.id)
     assertRedirects(response, news_detail + '#comments')
-    assert comment.text == FORM_DATA['text']
-    assert comment.news == news
-    assert comment.author == author
+    assert new_comment.text == FORM_DATA['text']
+    assert new_comment.news == comment.news
+    assert new_comment.author == comment.author
 
 
 def test_not_author_cant_delete_comment(

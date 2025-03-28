@@ -1,12 +1,15 @@
 from datetime import timedelta
 
 import pytest
+from django.conf import settings
 from django.test.client import Client
 from django.urls import reverse
 from django.utils import timezone
 
 from news.models import Comment, News
-from yanews.settings import NEWS_COUNT_ON_HOME_PAGE
+
+
+QUANTITY_NEWS = settings.NEWS_COUNT_ON_HOME_PAGE
 
 
 @pytest.fixture
@@ -62,7 +65,7 @@ def several_news():
             text=f'Новость {i}',
             date=timezone.now() - timedelta(days=i)
         )
-        for i in range(NEWS_COUNT_ON_HOME_PAGE + 1)
+        for i in range(QUANTITY_NEWS + 1)
     ]
     News.objects.bulk_create(all_news)
 
